@@ -1,0 +1,47 @@
+version: 1
+sequences:
+- protein:
+    id: A
+    sequence: MTMASVPASRYLTDMTLEEMSRDWSMLIPKQKVAGPLCIRMDQAIMDKNIILKANFSVIFDRLETLILLRAFTEEGAIVGEISPLPSLPGHTAEDVKNAVGVLIGGLEWNDNTVRVSETLQRFAWRS
+- ligand:
+    id: L
+    smiles: Nc1ccc(/C=C/C(=O)NCc2cc3cc(-c4ccc(C(=O)N5CCC(F)(F)CC5)cc4)cc(-c4ccc(F)cc4)c3o2)cn1
+templates:
+- cif: C:\Users\sarah\Drug-Discovery\boltz2-rerun\ns1_vina_site_boltz2\receptor\ns1_ed_receptor.cif
+  chain_id: A
+  force: true
+  threshold: 2.0
+properties:
+- affinity:
+    binder: L
+constraints:
+- pocket:
+    binder: L
+    contacts:
+    - - A
+      - 6
+    - - A
+      - 7
+    - - A
+      - 8
+    - - A
+      - 9
+    - - A
+      - 10
+    - - A
+      - 11
+    - - A
+      - 57
+    - - A
+      - 58
+    - - A
+      - 59
+    - - A
+      - 60
+    - - A
+      - 64
+    - - A
+      - 65
+    max_distance: 6.0
+    force: true
+

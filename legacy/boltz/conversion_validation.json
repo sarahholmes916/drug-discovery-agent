@@ -1,0 +1,10 @@
+{
+  "source_pdbqt": "C:\\Users\\sarah\\Drug-Discovery\\boltz2-rerun\\ns1_ed_receptor.pdbqt",
+  "output_pdb": "C:\\Users\\sarah\\Drug-Discovery\\boltz2-rerun\\ns1_vina_site_boltz2\\receptor\\ns1_ed_receptor.pdb",
+  "source_sha256": "5f4c9335d5384ff009eabc34d17c3ba223a94df2e6b138c7763ba709ca1124f6",
+  "output_sha256": "3480f65fe09d0b7e694658fee682d571d50e3320d34e61e02ec746a967fac5c0",
+  "atom_count": 1207,
+  "coordinate_max_abs_delta_angstrom": 0.0,
+  "coordinate_identity_verified": true,
+  "note": "Only PDBQT-specific charge and AutoDock atom-type fields were removed."
+}

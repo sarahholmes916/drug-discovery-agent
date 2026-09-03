@@ -1,0 +1,53 @@
+{
+  "receptor_pdbqt": "C:\\Users\\sarah\\Drug-Discovery\\boltz2-rerun\\ns1_ed_receptor.pdbqt",
+  "converted_receptor_pdb": "C:\\Users\\sarah\\Drug-Discovery\\boltz2-rerun\\ns1_vina_site_boltz2\\receptor\\ns1_ed_receptor.pdb",
+  "box_pdb": "C:\\Users\\sarah\\Drug-Discovery\\boltz2-rerun\\ns1_ed_receptor.box.pdb",
+  "box": {
+    "center_x": 26.448,
+    "center_y": 12.021,
+    "center_z": 27.94,
+    "size_x": 28.0,
+    "size_y": 28.0,
+    "size_z": 28.0
+  },
+  "receptor_chain": "A",
+  "receptor_residue_range": [
+    "79",
+    "205"
+  ],
+  "receptor_sequence_length": 127,
+  "selected_pocket_pdb_residues": [
+    84,
+    85,
+    86,
+    87,
+    88,
+    89,
+    135,
+    136,
+    137,
+    138,
+    142,
+    143
+  ],
+  "selected_pocket_labels": [
+    "A:84:VAL",
+    "A:85:PRO",
+    "A:86:ALA",
+    "A:87:SER",
+    "A:88:ARG",
+    "A:89:TYR",
+    "A:135:SER",
+    "A:136:VAL",
+    "A:137:ILE",
+    "A:138:PHE",
+    "A:142:GLU",
+    "A:143:THR"
+  ],
+  "selection_method": "nearest residues within 8 \u00c5 of box center, capped at 12",
+  "pocket_max_distance_angstrom": 6.0,
+  "force_pocket": true,
+  "force_template": true,
+  "template_threshold_angstrom": 2.0,
+  "generated_yaml_count": 39
+}

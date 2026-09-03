@@ -1,0 +1,19 @@
+.git
+.pytest_cache
+build
+dist
+legacy
+runs
+tests
+docs
+examples
+src
+apps/api
+apps/runner
+apps/__pycache__
+apps/local_ui.py
+control_plane.sqlite3
+*.pyc
+
+# apps/web/downloads is intentionally not ignored: local `vercel --prod`
+# uploads the already-built companion archive with the static site.

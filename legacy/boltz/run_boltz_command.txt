@@ -1,0 +1,1 @@
+boltz predict 'C:\Users\sarah\Drug-Discovery\boltz2-rerun\ns1_vina_site_boltz2\inputs' --out_dir 'C:\Users\sarah\Drug-Discovery\boltz2-rerun\ns1_vina_site_boltz2\results' --use_potentials --recycling_steps 3 --sampling_steps 200 --diffusion_samples 5 --output_format pdb --accelerator gpu --devices 1 --override --use_msa_server

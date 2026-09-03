@@ -1,0 +1,13 @@
+pdb_chain,pdb_residue_number,insertion_code,residue_name,receptor_sequence_ordinal,one_letter,min_distance_to_box_center_angstrom,heavy_atoms_inside_vina_box
+A,84,,VAL,6,V,4.802,7
+A,85,,PRO,7,P,3.124,7
+A,86,,ALA,8,A,4.127,5
+A,87,,SER,9,S,2.118,6
+A,88,,ARG,10,R,5.918,11
+A,89,,TYR,11,Y,6.675,12
+A,135,,SER,57,S,5.763,6
+A,136,,VAL,58,V,5.392,7
+A,137,,ILE,59,I,2.807,8
+A,138,,PHE,60,F,7.268,11
+A,142,,GLU,64,E,6.142,9
+A,143,,THR,65,T,7.666,7

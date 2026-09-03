@@ -1,0 +1,5 @@
+The final workbook-producing task was executed as multiple tool/notebook cells.
+The consolidated Python files in this bundle are the reusable version of those
+cells. The exact interaction and mapping rows from the delivered run are saved
+under reference_outputs so that the workbook can be recreated exactly even
+though the original interaction cells were not saved as a standalone .py file.

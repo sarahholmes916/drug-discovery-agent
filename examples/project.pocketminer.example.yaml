@@ -1,0 +1,77 @@
+project:
+  id: pocketminer_project
+  display_name: PocketMiner-guided local project
+
+workflow: vina_only
+
+target:
+  receptor_ref: receptor_structure
+  receptor_pdbqt_ref: receptor_vina
+  protein_chain: A
+
+pocket:
+  # No center/size: the run pauses until a candidate or custom box is confirmed.
+  mode: pocketminer
+
+pocketminer:
+  smoothing:
+    enabled: true
+    neighbor_count: 10
+    radius_angstrom: 10.0
+  clustering:
+    method: spatial_graph
+    score_threshold: 0.5
+    edge_distance_angstrom: 8.0
+    minimum_residues: 2
+    hotspot_radius_angstrom: 8.0
+    maximum_core_residues: 12
+  ranking:
+    method: weighted_interpretable
+    weights:
+      mean_score: 0.40
+      max_score: 0.20
+      residue_count: 0.20
+      compactness: 0.20
+    count_saturation: 12
+    compactness_scale_angstrom: 8.0
+  box:
+    method: score_weighted_centroid_heavy_atom_extent
+    padding_angstrom: 7.0
+    minimum_size: [18.0, 18.0, 18.0]
+    maximum_size: [40.0, 40.0, 40.0]
+  max_displayed_candidates: 5
+  runtime:
+    implementation: Mickdub/gvp:pocket_pred
+    repository_url: https://github.com/Mickdub/gvp.git
+    commit: 187062df3c94127e991669768009141a08fd5d8b
+    checkpoint_prefix: models/pocketminer
+
+ligands:
+  - source_ref: ligand_set_01
+    kind: multi_sdf
+
+vina:
+  enabled: true
+  profile: full
+
+boltz:
+  constrained:
+    enabled: false
+  unconstrained:
+    enabled: false
+
+analysis:
+  # Every ligand runs through Vina; only this top subset advances downstream.
+  vina_shortlist: 50
+  vina_selection_metric: best_affinity
+
+ranking:
+  policy: none
+
+execution:
+  ligand_workers: 1
+  vina_workers: 1
+  conformer_random_seed: 42
+
+control_plane:
+  enabled: false

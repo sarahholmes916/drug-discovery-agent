@@ -1,0 +1,16 @@
+{
+  "branch": "pocket_pred",
+  "commit": "187062df3c94127e991669768009141a08fd5d8b",
+  "files": {
+    "LICENSE": "3d09c75c21ed14a31d2433435fb35123544f10428b692ee7c5e86921f76fc7ec",
+    "models/pocketminer.data-00000-of-00001": "6f5ab62b9fb38b54040053ac321f3362d616bae9b31569249a032dbb50890b70",
+    "models/pocketminer.index": "09e36a62a987b14bc49cf7a1fa53fa734f85d85d088777f98c6aca253b47bf46",
+    "src/gvp.py": "90c402b48c6eafdee795e943e8df5a48941f5e301b4d9585f50339e03069f458",
+    "src/models.py": "cf7e2bd32e9501532732687f573a1c06e2bbe603d708d7b4e7d184c6a8493d24",
+    "src/util.py": "0cadf4211e106c365f4ad6bc749b2831c21962de74509a449401149280508201",
+    "src/validate_performance_on_xtals.py": "7e229aa3afce836b053030240c8b8afb13e326d3acae1a898e3570dfc9a5c71c",
+    "src/xtal_predict.py": "8717eba2ae7d98a4dc0ac65fb363de67e869fe832c2c262c648b925feae30297"
+  },
+  "license": "MIT",
+  "repository": "https://github.com/Mickdub/gvp.git"
+}

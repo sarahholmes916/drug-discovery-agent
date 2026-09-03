@@ -1,0 +1,15 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+*.sqlite3
+*.sqlite3-shm
+*.sqlite3-wal
+runs/*
+!runs/.gitkeep
+dist/
+build/
+*.egg-info/
+apps/web/downloads/*.zip
+apps/web/downloads/*.tar.gz
+apps/web/downloads/*.dmg

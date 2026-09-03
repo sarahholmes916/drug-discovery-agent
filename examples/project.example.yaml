@@ -1,0 +1,63 @@
+project:
+  id: example_project
+  display_name: Example local project
+
+workflow: vina_only
+
+target:
+  receptor_ref: receptor_structure
+  receptor_pdbqt_ref: receptor_vina
+  protein_chain: A
+
+pocket:
+  # Replace these neutral placeholders with a target-specific site.
+  # NS1 reference values are not generic defaults.
+  mode: explicit
+  center: [0.0, 0.0, 0.0]
+  vina_size: [20.0, 20.0, 20.0]
+
+ligands:
+  - source_ref: ligand_set_01
+    kind: multi_sdf
+
+vina:
+  enabled: true
+  profile: full
+  profiles:
+    fast:
+      exhaustiveness: 4
+      num_modes: 1
+    full:
+      exhaustiveness: 8
+      num_modes: 3
+
+boltz:
+  constrained:
+    enabled: false
+  unconstrained:
+    enabled: false
+  diffusion_samples: 5
+  use_msa_server: false
+
+analysis:
+  # Every ligand runs through Vina; only this top subset advances downstream.
+  vina_shortlist: 50
+  vina_selection_metric: best_affinity
+
+ranking:
+  policy: none
+
+# Optional: register this opaque reference with --ref and install .[reporting].
+# reporting:
+#   source_workbook_ref: prior_results_workbook
+#   output_workbook_name: drug_discovery_results.xlsx
+
+execution:
+  ligand_workers: 1
+  vina_workers: 1
+  boltz_workers: 1
+  plip_workers: 1
+  conformer_random_seed: 42
+
+control_plane:
+  enabled: false
