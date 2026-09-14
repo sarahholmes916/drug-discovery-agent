@@ -15,7 +15,7 @@ window.DRUG_AGENT_CONFIG = Object.freeze({
     "PLIP": "https://github.com/pharmai/plip",
   }),
   downloads: Object.freeze({
-    windows: "./downloads/DrugDiscoveryAgent-Companion-windows-x64.zip",
+    windows: "https://github.com/sarahholmes916/drug-discovery-agent/releases/download/v0.1.0/DrugDiscoveryAgent-Companion-windows-x64.zip",
     macos: "./downloads/DrugDiscoveryAgent-Companion-macos.zip",
     linux: "./downloads/DrugDiscoveryAgent-Companion-linux-x64.tar.gz",
   }),
