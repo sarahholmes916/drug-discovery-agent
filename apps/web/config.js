@@ -16,6 +16,6 @@ window.DRUG_AGENT_CONFIG = Object.freeze({
   }),
   downloads: Object.freeze({
     repository: "sarahholmes916/drug-discovery-agent",
-    tag: "v0.1.0", // Change only after the complete next release is published.
+    tag: "v0.1.1", // Change only after the complete next release is published.
   }),
 });
