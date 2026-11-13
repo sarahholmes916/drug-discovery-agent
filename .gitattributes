@@ -1,0 +1,4 @@
+# These pinned PocketMiner text resources are hashed as CRLF bytes in manifest.json.
+# Preserve those bytes on every checkout, independently of core.autocrlf.
+src/drug_discovery_agent/_vendor/pocketminer/LICENSE text eol=crlf
+src/drug_discovery_agent/_vendor/pocketminer/src/*.py text eol=crlf

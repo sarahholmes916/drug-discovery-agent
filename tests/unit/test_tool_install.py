@@ -5,6 +5,8 @@ import time
 from pathlib import Path
 from types import SimpleNamespace
 
+import pytest
+
 from apps.runner import tool_install
 from apps.runner.tool_install import ToolInstallManager
 
@@ -229,7 +231,9 @@ def test_plip_managed_install_pins_openbabel_and_verifies_inchikey(
     assert any("InChIKey" in message for message in messages)
 
 
-def test_nvidia_runtime_selects_newest_supported_pytorch_cuda_wheel(monkeypatch) -> None:
+@pytest.mark.parametrize("system", ["Windows", "Linux"])
+def test_nvidia_runtime_selects_newest_supported_pytorch_cuda_wheel(monkeypatch, system) -> None:
+    monkeypatch.setattr(tool_install.platform, "system", lambda: system)
     monkeypatch.setattr(tool_install.shutil, "which", lambda command: "/usr/bin/nvidia-smi")
 
     def fake_run(command, **kwargs):
@@ -243,6 +247,17 @@ def test_nvidia_runtime_selects_newest_supported_pytorch_cuda_wheel(monkeypatch)
 
     monkeypatch.setattr(tool_install.subprocess, "run", fake_run)
     assert tool_install._nvidia_gpu_runtime() == ("NVIDIA GeForce RTX 5090", "cu128")
+
+
+def test_nvidia_runtime_on_macos_does_not_probe_cuda(monkeypatch) -> None:
+    monkeypatch.setattr(tool_install.platform, "system", lambda: "Darwin")
+
+    def unexpected_probe(*args, **kwargs):
+        pytest.fail("macOS must not probe NVIDIA executables")
+
+    monkeypatch.setattr(tool_install.shutil, "which", unexpected_probe)
+    monkeypatch.setattr(tool_install.subprocess, "run", unexpected_probe)
+    assert tool_install._nvidia_gpu_runtime() is None
 
 
 def test_install_manager_reports_background_progress_and_reuses_active_task() -> None:
