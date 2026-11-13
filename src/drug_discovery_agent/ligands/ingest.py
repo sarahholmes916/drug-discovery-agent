@@ -60,6 +60,27 @@ def _source_files(source: LigandSourceConfig, resolved_path: Path) -> list[Path]
     return files
 
 
+def _sdf_records(source_file: Path, Chem):
+    """Retain malformed records that RDKit's whole-file iterator can omit.
+
+    Read one record at a time, retaining the title/blank lines and all molecule
+    bytes. This changes failure accounting only; RDKit still parses chemistry.
+    """
+    with source_file.open(encoding="utf-8", errors="replace") as handle:
+        lines = []
+        for line in handle:
+            lines.append(line)
+            if line.rstrip("\r\n") == "$$$$":
+                supplier = Chem.SDMolSupplier()
+                supplier.SetData("".join(lines), removeHs=False)
+                yield supplier[0] if len(supplier) else None
+                lines = []
+        if any(line.strip() for line in lines):
+            supplier = Chem.SDMolSupplier()
+            supplier.SetData("".join(lines), removeHs=False)
+            yield supplier[0] if len(supplier) else None
+
+
 def ingest_ligands(
     sources: Iterable[tuple[LigandSourceConfig, str | Path]],
     output_directory: str | Path,
@@ -75,9 +96,7 @@ def ingest_ligands(
     for source_config, resolved in sources:
         for source_file in _source_files(source_config, Path(resolved).expanduser().resolve()):
             source_file_id = f"source_{sha256_file(source_file)[:20]}"
-            supplier = Chem.SDMolSupplier(str(source_file), removeHs=False)
-            if supplier is None:
-                raise ValueError(f"RDKit could not open {source_file}")
+            supplier = _sdf_records(source_file, Chem)
             for record_index, molecule in enumerate(supplier, start=1):
                 raw_name = None
                 if molecule is not None and molecule.HasProp("_Name"):

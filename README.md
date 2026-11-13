@@ -41,8 +41,23 @@ truth. The migration inventory and exact file-to-behavior mapping are in
 
 ## Install
 
-Python 3.11 or newer is required. Install the package and the extras needed on
-the machine:
+For normal installation, download the matching companion from the website's
+published-release selector, extract it, and launch it. No Python setup or GitHub
+checkout is required. Windows x64 packaging has been tested locally; separate
+macOS Apple Silicon, macOS Intel and Linux x64 build workflows are implemented
+but have not run on native hardware in this change. Mac releases need Developer
+ID signing and notarization. The source repository is private, so anonymous
+website downloads remain unavailable until a separate distribution arrangement
+is authorized; members can use authenticated GitHub Releases.
+
+See [companion installation, hardware limits and release commands](docs/COMPANION_RELEASES.md).
+On Mac, choose Apple Silicon or Intel using About This Mac. Extract the ZIP,
+move the signed app into Applications and open it. On Windows, extract the
+entire ZIP and keep `_internal` beside the executable. On the website, click
+**Connect companion** and approve the exact origin in the local confirmation
+page. Scientific inputs/results are stored on this computer.
+
+For development/source installation, Python 3.11 or newer is required:
 
 ```bash
 python -m pip install -e ".[scientific,runner,test]"
@@ -122,8 +137,9 @@ structure has unresolved residues or differs from the intended construct.
 After pairing, the UI shows a Local scientific tools panel with live companion
 capability checks. Vina has a one-click managed install whose official binary
 and pinned SHA-256 are verified before execution. Boltz 2.2.1 also has a
-one-click install into a private Python 3.12 environment on supported Windows,
-Linux, and macOS systems. Its official wheel checksum is pinned. On Windows and
+one-click install into a private Python 3.12 environment on Windows, Linux,
+and Apple Silicon macOS; Intel Mac automatic Boltz installation is unavailable.
+Its official wheel checksum is pinned. On Windows and
 Linux, the installer detects NVIDIA hardware and selects a pinned official
 PyTorch CUDA build compatible with the installed driver; it then verifies
 `torch.cuda.is_available()` and records the GPU identity. Linux also receives
@@ -134,6 +150,15 @@ systems. Its exact pinned inference modules and checkpoint are already included,
 verified against fixed upstream SHA-256 hashes, and never replaced by a port or
 reimplementation. Other missing tools retain official setup links.
 The companion download button is removed after a companion is detected.
+
+Boltz 2.2.1 has no MPS accelerator. On Apple Silicon, CPU must be selected
+explicitly; CPU prediction/affinity execution is unverified and may be very
+slow. Existing GPU defaults and saved project settings are preserved. CPU
+runtime probes are reported separately from CUDA readiness. Mac app data uses
+`~/Library/Application Support/DrugDiscoveryAgent`; Windows keeps
+`~/DrugDiscoveryAgent`. Existing data/tool directories take precedence. Vina,
+PocketMiner and PLIP do not require a GPU. Tool installation failures remain
+visible and retryable with command logs saved locally.
 
 For constrained Boltz, review the automatically extracted protein sequence and
 explicit/imported/derived pocket residues, then select
@@ -159,18 +184,18 @@ locks that companion process to an exact website. When omitted, any HTTPS site
 may make the first pairing request; after visible local approval, that exact
 origin is saved locally and future requests from other origins are denied.
 
-Build the current Windows companion archive and copy it into the static web
-output with:
+Build the Windows companion archive with:
 
 ```powershell
 powershell -File scripts/build_companion.ps1
-vercel --prod
 ```
 
-The build creates `dist/DrugDiscoveryAgent-Companion-windows-x64.zip` and copies
-it to `apps/web/downloads/`, which is the default download link in
-`apps/web/config.js`. Code signing and publication through a trusted release
-channel are required before distributing it broadly.
+Use an isolated Python 3.12.10 environment. The build creates the ZIP, SHA-256,
+version inventory and verification report in `dist/windows-x64/`. All native
+builds use `scripts/build_companion.py`; artifacts are published only through
+the explicit release workflow. Vercel serves the static interface; archives
+are versioned GitHub Release assets. See [the release guide](docs/COMPANION_RELEASES.md)
+for signing secrets, all platform commands and unverified workflows.
 
 ## Optional remote control plane
 

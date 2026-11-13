@@ -4,12 +4,11 @@ import os
 from pathlib import Path
 
 from drug_discovery_agent.project.io import atomic_write_json, read_json
+from drug_discovery_agent.platform_support import data_home
 
 
 def runner_home() -> Path:
-    configured = os.environ.get("DRUG_AGENT_HOME")
-    root = Path(configured).expanduser() if configured else Path.home() / "DrugDiscoveryAgent"
-    return root.resolve()
+    return data_home()
 
 
 class RunnerRegistry:

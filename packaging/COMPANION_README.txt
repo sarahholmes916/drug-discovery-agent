@@ -1,28 +1,53 @@
 Drug Discovery Agent Companion
 ==============================
 
-1. Run DrugDiscoveryAgent-Companion.exe.
-2. Leave its window open while using the Drug Discovery Agent website.
-3. On the website, click Connect companion.
-4. Approve the exact website address in the local confirmation page.
+No Python installation or repository checkout is required.
 
-No pairing token needs to be copied or entered. The companion listens only on
-127.0.0.1 and scientific files remain on this computer.
+Windows x64: Extract the entire ZIP. Open DrugDiscoveryAgent-Companion.exe and
+keep _internal beside it. Leave the console open. Ctrl+C shuts it down.
+macOS 15+ Apple Silicon / Intel: Choose the matching processor build. Extract
+the ZIP, move the app to Applications and open it. Use a Developer ID signed,
+notarized release. Do not disable Gatekeeper. To stop an idle companion, use
+Activity Monitor > Quit, or run the executable in Terminal and use Ctrl+C.
+Linux x64: Extract the tarball and run ./DrugDiscoveryAgent-Companion. The build
+targets Ubuntu 22.04+ / glibc 2.35+. Preserve accompanying files and symlinks.
 
-The companion includes local Meeko receptor preparation. In recommended mode,
-the website asks how to handle water, heterogens, and alternate locations;
-ambiguous structures stop for review. Experts can upload their own PDBQT.
+Verify the archive's SHA-256 against the adjacent release checksum before use.
+Unsigned Windows builds can show trust warnings; verify origin and publisher.
+Mac/Linux support is implemented but native validation must be checked in the
+release's workflow results; do not infer it from a Windows test.
 
-After pairing, the website can install the pinned AutoDock Vina executable into
-the companion's private tools directory. The file is downloaded from the
-official release and verified before it is used. PocketMiner automatic setup is
-available on supported Windows, Linux, and macOS computers. Its exact pinned
-upstream inference code and checkpoint are included and integrity-checked;
-setup installs only a private compatible scientific environment.
-Boltz-2 can also be installed automatically into a private environment on
-supported Windows, Linux, and macOS computers. Its model weights download on
-the first prediction. On Windows and Linux, automatic setup detects NVIDIA
-hardware, installs CUDA-enabled PyTorch, and verifies GPU access.
+Open the Drug Discovery Agent website, click Connect companion, and approve
+that exact website on the local confirmation page. No token is copied/typed.
+The server listens only on 127.0.0.1:8765. If connection fails, check the running
+process, port conflict, browser local-network permission, and approved origin.
 
-Run the executable with --origin https://your-site.example to lock a release to
-one exact website origin. Repeat --origin to trust more than one website.
+Included: Python, RDKit, Meeko, Gemmi, NumPy/SciPy, reporting/server libraries,
+and the pinned PocketMiner inference files, checkpoint, manifest and license.
+After pairing, Install automatically manages Vina, PocketMiner dependencies,
+PLIP/Open Babel, and supported Boltz environments. Failures remain visible and
+retryable. Never delete project state to repair a dependency.
+
+Boltz 2.2.1: NVIDIA CUDA is optional on Windows/Linux. No MPS support. On Apple
+Silicon, explicitly choose CPU for new projects (slow, predictions unverified).
+Intel Mac automatic Boltz installation is unavailable because pinned PyTorch
+2.7.1 has no official macOS x64 wheel. Existing projects keep their settings.
+
+Molecular uploads and detailed results go directly to the local companion,
+never Vercel. Existing exception: Boltz's default public MSA service receives
+the protein sequence. Fully offline use needs compatible local MSAs and explicit
+use_msa_server: false; this release preserves the validated defaults.
+
+Data: Windows ~/DrugDiscoveryAgent; fresh Mac ~/Library/Application Support/
+DrugDiscoveryAgent; fresh Linux $XDG_DATA_HOME/DrugDiscoveryAgent (default
+~/.local/share/DrugDiscoveryAgent). Existing data/tool directories are reused.
+Override with DRUG_AGENT_HOME / DRUG_AGENT_TOOLS_HOME. Mac background logs are
+in the data directory's logs/companion.log. Setup command logs remain local.
+
+Run the executable with --doctor for dependency diagnostics, --self-check for
+bundled-resource checks, or --origin https://your-site.example for an origin lock.
+On Mac the executable is inside the app at Contents/MacOS/DrugDiscoveryAgent-Companion.
+
+Release guide: docs/COMPANION_RELEASES.md in the source repository.
+Preserve LICENSE, THIRD_PARTY_NOTICES.md, dependency-licenses and
+POCKETMINER_LICENSE.txt when redistributing. No signing credentials are bundled.

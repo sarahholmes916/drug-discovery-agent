@@ -5,13 +5,11 @@ import os
 import platform
 from pathlib import Path
 from typing import Any
+from drug_discovery_agent.platform_support import tools_home
 
 
 def managed_tools_home() -> Path:
-    configured = os.environ.get("DRUG_AGENT_TOOLS_HOME")
-    if configured:
-        return Path(configured).expanduser().resolve()
-    return (Path.home() / ".drug-agent" / "tools").resolve()
+    return tools_home()
 
 
 def managed_bin() -> Path:

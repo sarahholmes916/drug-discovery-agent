@@ -98,3 +98,20 @@ def test_native_windows_setup_uses_compatible_pinned_environment(
         conda_executable="micromamba.exe",
     )
     assert commands[2][:2] == ["micromamba.exe", "install"]
+
+
+def test_native_mac_setup_retains_scientific_pins_and_posix_python(tmp_path, monkeypatch):
+    monkeypatch.setattr(runtime, "DEFAULT_HOME", tmp_path / "PocketMiner with spaces")
+    monkeypatch.setattr(runtime.platform, "system", lambda: "Darwin")
+    monkeypatch.setattr(runtime, "inspect_installation", lambda _: {"available": True, "errors": []})
+    commands = []
+    class FakeExecutor:
+        def run(self, command, **kwargs):
+            commands.append(command)
+            return SimpleNamespace(successful=True, stdout="", stderr="")
+    config = PocketMinerRuntimeConfig()
+    runtime.setup(config, executor=FakeExecutor(), conda_executable="/Tools with spaces/micromamba")
+    assert "tensorflow=2.10" in commands[0]
+    assert "mdtraj=1.9.7" in commands[0]
+    assert "python=3.10" in commands[0]
+    assert runtime.environment_python(config).as_posix().endswith("environment/bin/python")

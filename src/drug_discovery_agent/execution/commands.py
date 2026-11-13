@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Callable, Literal, Mapping, Sequence
 
 from pydantic import BaseModel, ConfigDict, Field
+from drug_discovery_agent.platform_support import external_environment
 
 
 StreamName = Literal["stdout", "stderr"]
@@ -80,9 +81,7 @@ class CommandExecutor:
             raise ValueError("command cannot be empty")
         cwd = Path(working_directory).resolve()
         cwd.mkdir(parents=True, exist_ok=True)
-        env = os.environ.copy()
-        if environment:
-            env.update(environment)
+        env = external_environment(dict(environment) if environment else None)
 
         start_dt = datetime.now(UTC)
         start = time.monotonic()

@@ -1,7 +1,8 @@
 # Hosted web control plane
 
 Serve this directory as a static site. `config.js` selects the loopback
-companion address and platform download URLs. The page detects the companion,
+companion address and exact GitHub release repository/tag. Published assets are
+verified before downloads are enabled, and users explicitly select the processor. The page detects the companion,
 starts a one-time local approval, and stores the resulting origin-scoped session
 credential in browser session storage without displaying it to the user.
 
@@ -19,10 +20,13 @@ Boltz-2, and PLIP. Vina can be installed directly through the companion; its
 platform binary is fetched from the pinned official release, checked against a
 pinned SHA-256, version-probed, and immediately activated. Boltz 2.2.1 receives
 the same one-click treatment in a private Python 3.12 environment on supported
-Windows, Linux, and macOS systems. Its official wheel checksum is pinned. On
+Windows, Linux, and Apple Silicon macOS systems; Intel Mac automatic setup is
+unavailable. Its official wheel checksum is pinned. On
 Windows and Linux, the installer detects NVIDIA hardware and installs a pinned
 official PyTorch CUDA build selected for the driver's supported CUDA runtime.
-It reports success only after PyTorch confirms GPU access. Linux also receives
+It verifies GPU access when NVIDIA hardware is detected, or CPU tensor execution
+otherwise. Full CPU prediction on macOS is unverified; the pinned CLI has no MPS
+support. CPU must be chosen explicitly for new projects. Linux also receives
 Boltz's optimized CUDA-kernel extra; those kernel wheels are not published for
 Windows, but Windows predictions still use the NVIDIA GPU through PyTorch.
 Boltz model weights download on first use. PocketMiner receives one-click setup
@@ -62,3 +66,6 @@ after every connection. It can reopen a project, resume an eligible saved
 run, start a fresh run with the stored inputs, or download registered result
 artifacts and provenance as a ZIP. Local filesystem paths and raw molecular
 inputs are never returned by the project-list endpoint.
+
+See [the release guide](../../docs/COMPANION_RELEASES.md) for native build status,
+local data paths, private-repository download limits, and signing requirements.

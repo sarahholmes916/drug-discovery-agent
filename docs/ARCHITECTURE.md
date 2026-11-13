@@ -110,3 +110,21 @@ Scientific libraries and tools are detected lazily. `doctor` reports each
 capability independently. A missing optional tool disables dependent workflows
 without breaking inspection, configuration, or other workflows. External jobs
 share one executor, and item failures do not erase successful sibling results.
+
+## Native companion distribution
+
+One PyInstaller specification packages the existing companion entrypoint on
+Windows x64, macOS ARM64/x64 and Linux x64. Each release runs on its native
+architecture; the builder refuses cross-architecture labels. macOS uses an app
+bundle; the other hosts use a directory bundle. Only an explicit resource
+allowlist enters the archive, including the standalone PocketMiner adapter,
+pinned inference/checkpoint files, hashes and licenses. Scientific executables
+remain independent managed dependencies. No tool runtime or molecular data is
+hosted on Vercel.
+
+`platform_support` selects user data/tool directories while preserving existing
+installations and explicit overrides. The release workflow gates publication on
+all platform builds and extracted-executable tests. The website checks exact
+versioned release assets before enabling downloads; it does not guess processor
+architecture from the user agent. See [COMPANION_RELEASES.md](COMPANION_RELEASES.md)
+for support evidence, remaining native validation and private-repository limits.

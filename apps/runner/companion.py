@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import secrets
 import threading
+import signal
 import time
 import webbrowser
 from pathlib import Path
@@ -350,7 +351,10 @@ def create_companion_app(
                 alternate_locations=text_field("alternate_locations", "review"),
                 preparation_instructions=text_field("preparation_instructions") or None,
                 agent_notes=text_field("agent_notes") or None,
+                boltz_accelerator=text_field("boltz_accelerator", "gpu"),
             )
+            if options.boltz_accelerator not in {"gpu", "cpu"}:
+                raise ValueError("Boltz accelerator must be gpu or cpu")
             layout, config, uploaded_bytes = await create_project_from_uploads(
                 options=options,
                 receptor_structure=receptor_structure,
@@ -509,8 +513,18 @@ def run_companion(
     worker.start()
     print(f"Drug Discovery Agent Companion: {endpoint}", flush=True)
     print("Pairing credentials are generated automatically and are never typed by the user.", flush=True)
+    # Uvicorn captures shutdown signals and re-raises them after draining HTTP
+    # requests. A default SIGBREAK then aborts Python on Windows, bypassing our
+    # worker cleanup and potentially opening Windows Error Reporting. Consume
+    # only that post-drain signal; Uvicorn still owns the live server handler.
+    handled = [signal.SIGTERM]
+    if hasattr(signal, "SIGBREAK"):
+        handled.append(signal.SIGBREAK)
+    previous = {sig: signal.signal(sig, lambda *_: None) for sig in handled}
     try:
         uvicorn.run(app, host="127.0.0.1", port=port)
     finally:
         shutdown.set()
         worker.join(timeout=3)
+        for sig, handler in previous.items():
+            signal.signal(sig, handler)

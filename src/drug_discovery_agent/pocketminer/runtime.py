@@ -12,9 +12,10 @@ from drug_discovery_agent.config.models import PocketMinerRuntimeConfig
 from drug_discovery_agent.execution.commands import CancellationToken, CommandExecutor, CommandResult
 from drug_discovery_agent.project.hashing import sha256_file
 from drug_discovery_agent.project.io import atomic_write_json, read_json
+from drug_discovery_agent.platform_support import tools_home, external_environment
 
 
-DEFAULT_HOME = Path.home() / ".drug-agent" / "tools" / "pocketminer"
+DEFAULT_HOME = tools_home() / "pocketminer"
 VENDORED_HOME = Path(__file__).resolve().parent.parent / "_vendor" / "pocketminer"
 VENDORED_MANIFEST = VENDORED_HOME / "manifest.json"
 
@@ -86,7 +87,7 @@ def inspect_installation(config: PocketMinerRuntimeConfig) -> dict[str, object]:
             result = subprocess.run(
                 [str(python), str(adapter), "--repository", str(repository), "--probe"],
                 capture_output=True, text=True, timeout=30,
-                env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"},
+                env=external_environment({"PYTHONDONTWRITEBYTECODE": "1"}),
             )
             if result.returncode == 0:
                 probe = json.loads(result.stdout.strip().splitlines()[-1])
@@ -125,9 +126,9 @@ def setup(
     )
     if conda is None:
         raise RuntimeError("PocketMiner setup requires micromamba, mamba, or conda on PATH")
-    runner = executor or CommandExecutor()
     root, repository = installation_root(config), source_root(config)
     root.mkdir(parents=True, exist_ok=True)
+    runner = executor or CommandExecutor(root / "setup-commands")
     if repository == VENDORED_HOME:
         report_progress("Checking the included pinned PocketMiner inference code and model")
     else:

@@ -1,0 +1,100 @@
+name: Companion builds
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      ref:
+        type: string
+        required: true
+      version:
+        type: string
+        required: true
+      sign_macos:
+        type: boolean
+        default: false
+    secrets:
+      MACOS_CERTIFICATE_P12_BASE64:
+        required: false
+      MACOS_CERTIFICATE_PASSWORD:
+        required: false
+      MACOS_SIGNING_IDENTITY:
+        required: false
+      APPLE_API_KEY_BASE64:
+        required: false
+      APPLE_API_KEY_ID:
+        required: false
+      APPLE_API_ISSUER:
+        required: false
+permissions:
+  contents: read
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {os: windows-2022, target: windows-x64, arch: x64}
+          - {os: macos-15, target: macos-arm64, arch: arm64}
+          - {os: macos-15-intel, target: macos-x64, arch: x64}
+          - {os: ubuntu-22.04, target: linux-x64, arch: x64}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12.10'
+          architecture: ${{ matrix.arch }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.19.0'
+      - name: Install pinned build environment
+        run: python -m pip install -r packaging/requirements-build.txt
+      - name: Test before packaging
+        run: |
+          python -m pytest -q
+          node --test tests/web/*.test.cjs
+      - name: Import signing credentials into a temporary keychain
+        if: runner.os == 'macOS' && inputs.sign_macos
+        env:
+          MACOS_CERTIFICATE_P12_BASE64: ${{ secrets.MACOS_CERTIFICATE_P12_BASE64 }}
+          MACOS_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
+          MACOS_SIGNING_IDENTITY: ${{ secrets.MACOS_SIGNING_IDENTITY }}
+          APPLE_API_KEY_BASE64: ${{ secrets.APPLE_API_KEY_BASE64 }}
+          APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
+          APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
+        run: python scripts/macos_signing.py prepare
+      - name: Build and verify native resources
+        env:
+          BUILD_TARGET: ${{ matrix.target }}
+          RELEASE_VERSION: ${{ inputs.version }}
+          SIGN_MACOS: ${{ runner.os == 'macOS' && inputs.sign_macos }}
+        run: |
+          args=(--target "$BUILD_TARGET")
+          if [ -n "$RELEASE_VERSION" ]; then args+=(--version "$RELEASE_VERSION"); fi
+          if [ "$SIGN_MACOS" = true ]; then args+=(--notarize); fi
+          python scripts/build_companion.py "${args[@]}"
+      - name: Verify extracted archive and test its actual executable
+        env:
+          BUILD_TARGET: ${{ matrix.target }}
+        run: python scripts/prepare_companion_smoke.py --target "$BUILD_TARGET"
+      - name: Launch, authorize, stop and restart extracted companion
+        run: python -m pytest -q tests/integration/test_companion_process.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: companion-${{ matrix.target }}
+          path: dist/${{ matrix.target }}/
+          if-no-files-found: error
+          retention-days: 14
+      - name: Remove temporary signing credentials
+        if: always() && runner.os == 'macOS' && inputs.sign_macos
+        run: python scripts/macos_signing.py cleanup

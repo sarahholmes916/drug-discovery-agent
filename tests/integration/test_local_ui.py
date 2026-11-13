@@ -91,9 +91,9 @@ def test_combined_local_ui_serves_page_and_prefixed_api(tmp_path) -> None:
     assert "Local results verified" in llm_chat.text
     assert "could not be formatted safely" in llm_chat.text
     assert client.get("/llm-worker.js").status_code == 200
-    download = client.get("/downloads/DrugDiscoveryAgent-Companion-windows-x64.zip")
-    assert download.status_code == 200
-    assert download.headers["content-type"] in {"application/zip", "application/x-zip-compressed"}
+    # Release archives are external; CI must not require an ignored local ZIP.
+    assert client.get("/companion-downloads.js").status_code == 200
+    assert 'id="companion-platform"' in page.text
     response = client.get("/api/health")
     assert response.status_code == 200
     assert response.json() == {"status": "ok", "data_plane": False}

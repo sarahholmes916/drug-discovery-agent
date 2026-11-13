@@ -1,9 +1,11 @@
 # Companion release files
 
-The web UI expects release archives in this directory using the names configured
-in `../config.js`. Build the Windows archive with
-`powershell -File scripts/build_companion.ps1`; the generated archive is written
-to `dist/` and should be copied here (or the URL in `config.js` should be changed
-to the corresponding release asset URL) before deploying the static website.
+Companion archives are versioned GitHub Release assets. The website checks the
+exact repository/tag in `../config.js` before enabling an architecture's link.
+Missing/private releases are shown as unavailable. Never place a GitHub token
+in this static directory. A private source repository requires a separately
+authorized distribution arrangement for anonymous visitors.
 
-Do not commit private signing certificates or release credentials.
+Builds are written to `dist/<target>/`; the release workflow publishes only after
+all native builds and checks pass. Vercel excludes local ZIP/tar.gz/DMG files.
+See `docs/COMPANION_RELEASES.md` for installation, signing and publication.

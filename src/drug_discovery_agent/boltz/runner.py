@@ -20,6 +20,11 @@ def boltz_execution_error(result: CommandResult) -> str | None:
 
 
 def build_boltz_command(inputs: str | Path, output_directory: str | Path, config: BoltzConfig) -> list[str]:
+    if platform.system() == "Darwin" and config.accelerator != "cpu":
+        raise ValueError(
+            "Pinned Boltz 2.2.1 does not support MPS or CUDA on macOS. "
+            "Select boltz.accelerator: cpu explicitly to try the unverified, slow CPU path."
+        )
     command = ["boltz", "predict", str(inputs), "--out_dir", str(output_directory)]
     if config.use_potentials:
         command.append("--use_potentials")
@@ -37,7 +42,7 @@ def build_boltz_command(inputs: str | Path, output_directory: str | Path, config
         command.append("--use_msa_server")
     # Boltz's optional cuequivariance CUDA extension is not published for
     # Windows. Its supported fallback still runs on the GPU through PyTorch.
-    if platform.system() == "Windows":
+    if platform.system() in {"Windows", "Darwin"} or config.accelerator == "cpu":
         command.append("--no_kernels")
     return command
 

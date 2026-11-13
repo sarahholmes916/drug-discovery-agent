@@ -15,6 +15,17 @@ Tests scan serialized payloads for forbidden content and absolute paths. Future
 synchronization must be a separately authenticated, explicit opt-in feature
 with a visible artifact allowlist; it is out of scope for the default design.
 
+This Vercel/control-plane boundary does not imply that every optional tool is
+offline. The validated Boltz default `use_msa_server: true` sends protein
+sequences to the public upstream MSA service, disclosed in the website. Offline
+Boltz requires researcher-supplied compatible MSAs and explicit configuration;
+packaging does not change that scientific default.
+
+Release lookup sends only the configured repository/tag to GitHub. It sends no
+companion credential, input, project identity or result. Private-repository
+release metadata failures disable downloads; the website never contains a GitHub
+token. Release archives exclude researcher directories and local state.
+
 ## Hosted-service behavior
 
 In the default companion deployment, the hosted service is static and receives

@@ -38,6 +38,10 @@ def create_local_ui_app(*, database: str | Path, token: str | None = None):
     def web_llm_worker():
         return FileResponse(llm_worker, media_type="text/javascript")
 
+    @app.get("/companion-downloads.js", include_in_schema=False)
+    def companion_downloads():
+        return FileResponse(index.parent / "companion-downloads.js", media_type="text/javascript")
+
     app.mount("/downloads", StaticFiles(directory=downloads), name="companion-downloads")
 
     # Keep the old prefixed API available only when an explicit legacy token is

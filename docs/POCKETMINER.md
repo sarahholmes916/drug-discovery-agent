@@ -33,6 +33,16 @@ drug-agent pocketminer-inspect
 drug-agent doctor
 ```
 
+Native TensorFlow 2.10 and MDTraj 1.9.7 packages are listed for both Intel and
+Apple Silicon Mac environments. Package availability has been checked; a Mac
+environment solve/inference run has not been performed in this change. The
+manual native scientific smoke workflow provides that check using one fixture.
+Both the pinned upstream files and the standalone adapter source must be in
+the frozen bundle; packaging verifies their presence/integrity. Fresh Mac tool
+environments live below `~/Library/Application Support/DrugDiscoveryAgent/tools`;
+existing `~/.drug-agent/tools` installations and explicit overrides remain valid.
+See [platform/release verification scope](COMPANION_RELEASES.md).
+
 `pocketminer-setup` does not download or modify PocketMiner code. It verifies the
 included files, creates a private compatible conda environment, checks required
 imports, hashes every inference/checkpoint file, and caches the verified result.

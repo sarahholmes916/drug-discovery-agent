@@ -1,0 +1,19 @@
+# Python 3.12.10 on every release runner. Important runtime/build pins; the
+# resolved transitive versions and licenses are captured in every archive.
+pip==25.2
+setuptools==80.9.0
+pyinstaller==6.16.0
+pyinstaller-hooks-contrib==2025.9
+pydantic==2.11.4
+PyYAML==6.0.2
+numpy==1.26.4
+scipy==1.13.1
+rdkit==2025.3.6
+gemmi==0.7.3
+meeko==0.7.1
+openpyxl==3.1.5
+fastapi==0.115.12
+uvicorn==0.34.2
+python-multipart==0.0.20
+pytest==8.4.1
+httpx==0.28.1

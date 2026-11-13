@@ -163,7 +163,7 @@ def test_boltz_managed_install_uses_pinned_wheel_and_publishes_launcher(
     pip_commands = [command for command in commands if "-m" in command and "pip" in command]
     assert len(pip_commands) == 2
     assert all(command[0] == str(environment / "python.exe") for command in pip_commands)
-    torch_command = next(command for command in pip_commands if "torch==2.7.1" in command)
+    torch_command = next(command for command in pip_commands if "--index-url" in command)
     assert torch_command[-1] == "https://download.pytorch.org/whl/cu128"
     boltz_command = next(command for command in pip_commands if command[-1].startswith("boltz @ file:"))
     assert boltz_command[-1].startswith("boltz @ file:")

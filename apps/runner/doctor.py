@@ -57,8 +57,9 @@ def _command(display: str, command: str, version_args: list[str]) -> Capability:
         lines = (result.stdout or result.stderr).strip().splitlines()
         version = lines[0][:160] if lines else None
     except (OSError, subprocess.SubprocessError):
-        version = None
-    return Capability(display, True, version)
+        return Capability(display, False, detail="Executable could not start; check architecture and dependencies.")
+    return Capability(display, result.returncode == 0, version,
+                      None if result.returncode == 0 else "Executable verification failed; check local installation logs.")
 
 
 def _boltz_command() -> Capability:
@@ -70,11 +71,16 @@ def _boltz_command() -> Capability:
             torch_cuda = metadata.get("torch_cuda") or "unknown"
             mode = f"GPU: {gpu_name}; CUDA {torch_cuda}"
             return Capability("Boltz-2", True, f"{metadata['version']} ({mode})")
+        if metadata.get("cpu_verified") is True:
+            return Capability(
+                "Boltz-2", True, f"{metadata['version']} (CPU runtime; prediction unverified)",
+                "Set boltz.accelerator to cpu explicitly. CPU predictions are slow and unverified; MPS is not supported by pinned Boltz 2.2.1.",
+            )
         return Capability(
             "Boltz-2",
             False,
             f"{metadata['version']} (GPU runtime unavailable)",
-            "Run automatic Boltz setup again to install and verify CUDA-enabled PyTorch.",
+            "Run automatic Boltz setup again to verify a supported CPU or CUDA runtime.",
         )
     return _command("Boltz-2", "boltz", ["--help"])
 

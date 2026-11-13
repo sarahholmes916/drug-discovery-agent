@@ -13,9 +13,12 @@ from pathlib import Path
 from typing import Callable, Mapping
 from urllib.request import Request, urlopen
 from uuid import uuid4
+from datetime import datetime, UTC
 
 from drug_discovery_agent.config.models import PocketMinerRuntimeConfig
 from drug_discovery_agent.pocketminer.runtime import setup as setup_pocketminer
+from drug_discovery_agent.platform_support import boltz_installation_limit, external_environment
+from drug_discovery_agent.project.io import atomic_write_json
 
 from .tool_paths import (
     activate_managed_tools,
@@ -92,7 +95,8 @@ def vina_download() -> tuple[str, str, str] | None:
 def installation_catalog() -> dict[str, dict[str, object]]:
     vina = vina_download()
     pocketminer_automatic = _micromamba_asset() is not None
-    boltz_automatic = _micromamba_asset() is not None
+    boltz_limit = boltz_installation_limit()
+    boltz_automatic = _micromamba_asset() is not None and boltz_limit is None
     plip_automatic = _micromamba_asset() is not None
     return {
         "AutoDock Vina": {
@@ -115,7 +119,7 @@ def installation_catalog() -> dict[str, dict[str, object]]:
             "automatic": boltz_automatic,
             "download_url": "https://github.com/jwohlwend/boltz#installation",
             "reason": (
-                None if boltz_automatic else
+                None if boltz_automatic else boltz_limit or
                 "Automatic Boltz setup is not available for this operating system and CPU."
             ),
         },
@@ -293,6 +297,8 @@ def _plip_environment_paths() -> tuple[Path, Path, Path]:
 
 
 def _run_setup_command(command: list[str], *, environment: dict[str, str], timeout: int) -> subprocess.CompletedProcess[str]:
+    record = {"command": command, "started": datetime.now(UTC).isoformat(),
+              "environment_keys": sorted(environment), "timeout_seconds": timeout}
     try:
         result = subprocess.run(
             command,
@@ -301,8 +307,12 @@ def _run_setup_command(command: list[str], *, environment: dict[str, str], timeo
             timeout=timeout,
             env=environment,
         )
+        record.update(return_code=result.returncode, stdout=result.stdout, stderr=result.stderr)
     except (OSError, subprocess.SubprocessError) as exc:
+        record["error"] = str(exc)
         raise ToolInstallError(f"automatic tool setup could not run: {exc}") from exc
+    finally:
+        atomic_write_json(managed_tools_home() / "setup-commands" / f"{uuid4().hex}.json", record)
     if result.returncode != 0:
         detail = (result.stderr or result.stdout or "no diagnostic output").strip()[-1000:]
         raise ToolInstallError(f"automatic tool setup failed: {detail}")
@@ -311,6 +321,8 @@ def _run_setup_command(command: list[str], *, environment: dict[str, str], timeo
 
 def _nvidia_gpu_runtime() -> tuple[str, str] | None:
     """Return the first NVIDIA GPU and newest compatible pinned PyTorch CUDA wheel."""
+    if platform.system() == "Darwin":
+        return None
     executable = shutil.which("nvidia-smi")
     if not executable:
         return None
@@ -352,6 +364,7 @@ def _write_boltz_metadata(
     gpu_name: str | None,
     torch_version: str | None,
     torch_cuda: str | None,
+    cpu_verified: bool = False,
 ) -> None:
     metadata_path = managed_tools_home() / "boltz" / "installation.json"
     metadata_path.parent.mkdir(parents=True, exist_ok=True)
@@ -368,6 +381,7 @@ def _write_boltz_metadata(
                     "torch_version": torch_version,
                     "torch_cuda": torch_cuda,
                     "wheel_sha256": BOLTZ_WHEEL_SHA256,
+                    **({"cpu_verified": True} if cpu_verified else {}),
                 },
                 indent=2,
                 sort_keys=True,
@@ -380,9 +394,11 @@ def _write_boltz_metadata(
 
 
 def install_boltz(progress: Progress) -> str:
+    if limitation := boltz_installation_limit():
+        raise ToolInstallError(limitation)
     conda = _managed_micromamba(progress)
     environment_path, python_path, source_launcher = _boltz_environment_paths()
-    environment = os.environ.copy()
+    environment = external_environment()
     environment["MAMBA_ROOT_PREFIX"] = str(managed_tools_home() / "micromamba" / "root")
 
     environment_path.parent.mkdir(parents=True, exist_ok=True)
@@ -429,7 +445,7 @@ def install_boltz(progress: Progress) -> str:
         _run_setup_command(
             [
                 str(python_path), "-m", "pip", "install", "--disable-pip-version-check",
-                "--no-input", "--upgrade", requirement,
+                "--no-input", "--upgrade", f"torch=={TORCH_VERSION}", requirement,
             ],
             environment=environment,
             timeout=3600,
@@ -506,6 +522,15 @@ def install_boltz(progress: Progress) -> str:
                 raise ToolInstallError(
                     "an NVIDIA GPU was detected, but the installed PyTorch runtime could not use it"
                 )
+        cpu_verified = False
+        if not nvidia_runtime:
+            progress("Verifying CPU tensor execution; full Boltz CPU predictions remain unverified")
+            cpu_result = _run_setup_command(
+                [str(python_path), "-c", "import torch; assert (torch.ones(2) + 1).sum().item() == 4; print(torch.__version__)"],
+                environment=environment, timeout=120,
+            )
+            torch_version = cpu_result.stdout.strip()
+            cpu_verified = True
         _run_setup_command(
             [str(source_launcher), "--help"],
             environment=environment,
@@ -529,6 +554,7 @@ def install_boltz(progress: Progress) -> str:
             gpu_name=gpu_name,
             torch_version=torch_version,
             torch_cuda=torch_cuda,
+            cpu_verified=cpu_verified,
         )
         activate_managed_tools()
         return (
@@ -565,7 +591,7 @@ def install_plip(progress: Progress) -> str:
     """Install PLIP with a matched Open Babel build in a private environment."""
     conda = _managed_micromamba(progress)
     environment_path, python_path, source_launcher = _plip_environment_paths()
-    environment = os.environ.copy()
+    environment = external_environment()
     environment["MAMBA_ROOT_PREFIX"] = str(managed_tools_home() / "micromamba" / "root")
     scientific_packages = [
         "python=3.12",

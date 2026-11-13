@@ -39,6 +39,7 @@ class ProjectUploadOptions:
     alternate_locations: str = "review"
     preparation_instructions: str | None = None
     agent_notes: str | None = None
+    boltz_accelerator: str = "gpu"
 
 
 _STRUCTURE_EXTENSIONS = {".pdb", ".ent", ".cif", ".mmcif"}
@@ -202,6 +203,7 @@ async def create_project_from_uploads(
         }],
         "vina": {"enabled": True},
         "boltz": {
+            "accelerator": options.boltz_accelerator,
             "constrained": {"enabled": options.boltz_constrained},
             "unconstrained": {"enabled": options.boltz_unconstrained},
         },

@@ -1,0 +1,69 @@
+name: Publish companion release
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing immutable version tag (for example v0.1.1)
+        type: string
+        required: true
+      prerelease:
+        description: Mark as a prerelease (recommended until native installations are reviewed)
+        type: boolean
+        default: true
+      sign_macos:
+        description: Sign and notarize both Mac apps (required for a stable release)
+        type: boolean
+        default: true
+permissions:
+  contents: read
+concurrency:
+  group: companion-release-${{ inputs.tag }}
+  cancel-in-progress: false
+jobs:
+  preflight:
+    runs-on: ubuntu-22.04
+    outputs:
+      sha: ${{ steps.validate.outputs.sha }}
+      version: ${{ steps.validate.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - id: validate
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.tag }}
+          PRERELEASE: ${{ inputs.prerelease }}
+          SIGN_MACOS: ${{ inputs.sign_macos }}
+        run: python scripts/publish_companion.py preflight
+  builds:
+    needs: preflight
+    uses: ./.github/workflows/companion-build.yml
+    with:
+      ref: ${{ needs.preflight.outputs.sha }}
+      version: ${{ needs.preflight.outputs.version }}
+      sign_macos: ${{ inputs.sign_macos }}
+    secrets: inherit
+  publish:
+    needs: [preflight, builds]
+    runs-on: ubuntu-22.04
+    environment: companion-release
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.preflight.outputs.sha }}
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: companion-*
+          path: release-artifacts
+      - name: Validate all artifacts, upload to a draft, then publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.tag }}
+          RELEASE_SHA: ${{ needs.preflight.outputs.sha }}
+          PRERELEASE: ${{ inputs.prerelease }}
+          SIGN_MACOS: ${{ inputs.sign_macos }}
+        run: python scripts/publish_companion.py publish

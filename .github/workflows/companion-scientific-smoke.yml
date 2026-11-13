@@ -1,0 +1,40 @@
+name: Native scientific dependency smoke
+on:
+  workflow_dispatch:
+    inputs:
+      boltz_runtime:
+        description: Also install/probe Boltz (large download; skipped on Intel Mac)
+        type: boolean
+        default: false
+permissions:
+  contents: read
+jobs:
+  smoke:
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {os: windows-2022, arch: x64}
+          - {os: macos-15, arch: arm64}
+          - {os: macos-15-intel, arch: x64}
+          - {os: ubuntu-22.04, arch: x64}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12.10'
+          architecture: ${{ matrix.arch }}
+      - run: python -m pip install -r packaging/requirements-build.txt
+      - env:
+          BOLTZ_RUNTIME: ${{ inputs.boltz_runtime && matrix.os != 'macos-15-intel' }}
+        run: |
+          args=()
+          if [ "$BOLTZ_RUNTIME" = true ]; then args+=(--boltz-runtime); fi
+          python scripts/scientific_smoke.py "${args[@]}"

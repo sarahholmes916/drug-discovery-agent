@@ -96,6 +96,7 @@ def test_companion_pairs_without_user_entered_token(tmp_path) -> None:
             "boltz_unconstrained": "false",
             "downstream_ligand_count": "25",
             "downstream_selection_metric": "ligand_efficiency",
+            "boltz_accelerator": "cpu",
         },
         files=[
             ("receptor_structure", ("target.pdb", b"ATOM      1  CA  ALA A   1       1.000   2.000   3.000  1.00 20.00           C  \nEND\n", "chemical/x-pdb")),
@@ -110,6 +111,7 @@ def test_companion_pairs_without_user_entered_token(tmp_path) -> None:
     assert config.pocket.mode == "pocketminer"
     assert config.analysis.vina_shortlist == 25
     assert config.analysis.vina_selection_metric == "ligand_efficiency"
+    assert config.boltz.accelerator == "cpu"
     references = read_json(project_root / "state" / "local_refs.json")["references"]
     assert references["receptor_structure"].endswith("receptor.pdb")
     assert references["receptor_vina"].endswith("receptor.pdbqt")
