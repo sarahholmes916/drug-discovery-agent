@@ -19,6 +19,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 from drug_discovery_agent.distribution import verify_pocketminer_resources
+from drug_discovery_agent.macos_compatibility import MACOS_MINIMUM, verify_macos_bundle
 from drug_discovery_agent.platform_support import architecture
 
 TARGETS = {("Windows", "x64"): "windows-x64", ("Darwin", "arm64"): "macos-arm64",
@@ -77,6 +78,8 @@ def main() -> None:
     log = work / "build-commands.jsonl"
     env = {**os.environ, "COMPANION_VERSION": version,
            "COMPANION_NATIVE_ARCH": "arm64" if architecture() == "arm64" else "x86_64"}
+    if system == "Darwin":
+        env["MACOSX_DEPLOYMENT_TARGET"] = MACOS_MINIMUM
     run([sys.executable, "-m", "PyInstaller", "--noconfirm", "--clean", "--distpath", str(work / "dist"),
          "--workpath", str(work / "work"), str(ROOT / "packaging/companion.spec")], log, cwd=ROOT, env=env)
     stage = work / "release"
@@ -121,6 +124,8 @@ def main() -> None:
                 "host": platform.platform(), "dependencies": dict(sorted(inventory.items())),
                 "pocketminer_sha256": resources, "signed": bool(os.environ.get("MACOS_SIGNING_IDENTITY")),
                 "notarized": args.notarize}
+    if system == "Darwin":
+        manifest["macos_compatibility"] = verify_macos_bundle(stage / bundle.name, log)
     (stage / "build-manifest.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
     run([str(executable), "--self-check", str(work / "self-check.json")], log, timeout=180)
     check = json.loads((work / "self-check.json").read_text())

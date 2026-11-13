@@ -7,6 +7,7 @@ from PyInstaller.utils.hooks import collect_all, collect_submodules, copy_metada
 root = Path(SPECPATH).parent
 sys.path.insert(0, str(root / "src"))
 from drug_discovery_agent.distribution import verify_pocketminer_resources
+from drug_discovery_agent.macos_compatibility import MACOS_MINIMUM
 
 resources = verify_pocketminer_resources()
 vendor = root / "src/drug_discovery_agent/_vendor/pocketminer"
@@ -38,4 +39,4 @@ if sys.platform == "darwin":
     app = BUNDLE(coll, name="DrugDiscoveryAgent-Companion.app",
                  bundle_identifier="org.drugdiscoveryagent.companion",
                  info_plist={"CFBundleShortVersionString": os.environ.get("COMPANION_VERSION", "0.1.0"),
-                             "LSMinimumSystemVersion": "15.0", "NSHighResolutionCapable": True})
+                             "LSMinimumSystemVersion": MACOS_MINIMUM, "NSHighResolutionCapable": True})

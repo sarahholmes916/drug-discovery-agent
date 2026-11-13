@@ -8,8 +8,8 @@ implemented build support from installations actually exercised on hardware.
 | Archive target | Build runner | Minimum advertised system | Verification in this change |
 | --- | --- | --- | --- |
 | windows-x64 | windows-2022, x64 Python | Windows 10/11 x64 | Built locally; extracted executable, native imports, localhost/auth rejection, graceful shutdown and restart tested |
-| macos-arm64 | macos-15, ARM64 Python | macOS 15+, Apple Silicon | Implemented; no Mac build or installation executed here |
-| macos-x64 | macos-15-intel, x64 Python | macOS 15+, Intel | Implemented; no Mac build or installation executed here |
+| macos-arm64 | macos-15, ARM64 Python | macOS 14+ target, Apple Silicon | Native minimum-version gate; Sonoma runtime test pending |
+| macos-x64 | macos-15-intel, x64 Python | macOS 14+ target, Intel | Native minimum-version gate; Sonoma runtime test pending |
 | linux-x64 | ubuntu-22.04, x64 Python | Ubuntu 22.04+ / compatible glibc 2.35+ | Implemented; no Linux build or installation executed here |
 
 No universal Mac binary or Rosetta fallback is claimed. The builder rejects a
@@ -17,6 +17,29 @@ target that differs from the executing Python architecture. PyInstaller also
 checks native extension architecture during Mac collection. Native import and
 resource checks run again in the built executable and in the extracted archive.
 Older operating systems, ARM Windows/Linux, and musl Linux are unverified.
+
+### Sonoma testing builds
+
+New Mac builds declare `LSMinimumSystemVersion=14.0` and set
+`MACOSX_DEPLOYMENT_TARGET=14.0`. Setting a deployment target cannot make an
+already compiled dependency compatible: before packaging, the builder inspects
+every bundled Mach-O executable, extension and library using `otool -l`. A
+declared minimum above 14.0 or an unreadable minimum fails the build. The native
+version inventory is recorded under `macos_compatibility` in the build manifest;
+commands are recorded in the build command log. Scientific dependency pins are
+unchanged. This gate does not establish API/symbol compatibility or replace a
+real Sonoma launch and workflow test.
+
+Keep the macOS 15 runners for build/import/startup/pairing/restart checks.
+[GitHub retired macOS 14 runners on November 2, 2026](https://github.com/actions/runner-images/issues/13518),
+so do not switch CI to the retired runner label. Test a newly built ARM64 archive
+on the M1 running Sonoma 14.5: open the app, connect and approve the website,
+save a small test project, stop/restart and reconnect, then exercise the needed
+scientific tools separately. Record OS version, artifact checksum and results.
+Gatekeeper signing/notarization requirements still apply. Browser-local AI and
+separately installed scientific environments are not certified by the bundle
+check. Existing published archives still have their original OS requirement;
+rebuild and distribute a new version rather than editing an installed app's plist.
 
 **Distribution blocker:** the source repository is private (verified during this
 change). Anonymous visitors cannot fetch its GitHub Release assets or metadata.

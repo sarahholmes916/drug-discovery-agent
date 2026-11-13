@@ -5,7 +5,7 @@ No Python installation or repository checkout is required.
 
 Windows x64: Extract the entire ZIP. Open DrugDiscoveryAgent-Companion.exe and
 keep _internal beside it. Leave the console open. Ctrl+C shuts it down.
-macOS 15+ Apple Silicon / Intel: Choose the matching processor build. Extract
+macOS 14+ target, Apple Silicon / Intel: Choose the matching processor build. Extract
 the ZIP, move the app to Applications and open it. Use a Developer ID signed,
 notarized release. Do not disable Gatekeeper. To stop an idle companion, use
 Activity Monitor > Quit, or run the executable in Terminal and use Ctrl+C.
@@ -16,6 +16,9 @@ Verify the archive's SHA-256 against the adjacent release checksum before use.
 Unsigned Windows builds can show trust warnings; verify origin and publisher.
 Mac/Linux support is implemented but native validation must be checked in the
 release's workflow results; do not infer it from a Windows test.
+Mac builds run on macOS 15 CI and check every bundled native library's declared
+minimum OS version. Sonoma 14.5 runtime testing remains required; this does not
+certify separately installed scientific tools or browser WebGPU support.
 
 Open the Drug Discovery Agent website, click Connect companion, and approve
 that exact website on the local confirmation page. No token is copied/typed.

@@ -58,6 +58,8 @@ jobs:
         with:
           node-version: '24.19.0'
       - name: Install pinned build environment
+        env:
+          MACOSX_DEPLOYMENT_TARGET: '14.0'
         run: python -m pip install -r packaging/requirements-build.txt
       - name: Test before packaging
         run: |
